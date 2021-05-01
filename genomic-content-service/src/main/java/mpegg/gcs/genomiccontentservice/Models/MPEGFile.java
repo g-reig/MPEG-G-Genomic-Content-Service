@@ -1,29 +1,38 @@
 package mpegg.gcs.genomiccontentservice.Models;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name="mpegfile")
+@Table(name="mpegfile",
+        uniqueConstraints=
+        @UniqueConstraint(columnNames={"owner","name"}))
+
 public class MPEGFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public MPEGFile() {
-    }
+    @Column(nullable = false)
+    private String name;
 
     @Column(unique = true)
     private String path;
 
     private String owner;
 
-    public MPEGFile(String owner) {
-        this.owner = owner;
+    @OneToMany(mappedBy = "mpegfile", fetch = FetchType.LAZY)
+    private List<DatasetGroup> datasetGroups;
+
+    public MPEGFile() {
     }
 
-    @OneToMany(mappedBy = "mpegfile", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<DatasetGroup> datasetGroups;
+    public MPEGFile(String owner, String name) {
+        this.owner = owner;
+        this.name = name;
+    }
 
     public Long getId() {
         return id;
@@ -45,11 +54,15 @@ public class MPEGFile {
         this.owner = owner;
     }
 
-    public Set<DatasetGroup> getDatasetGroups() {
-        return datasetGroups;
+    public String getName() {
+        return name;
     }
 
-    public void setDatasetGroups(Set<DatasetGroup> datasetGroups) {
-        this.datasetGroups = datasetGroups;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<DatasetGroup> getDatasetGroups() {
+        return datasetGroups;
     }
 }

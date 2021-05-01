@@ -1,6 +1,8 @@
 package mpegg.gcs.genomiccontentservice.Models;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -20,10 +22,79 @@ public class DatasetGroup {
 
     private String center;
 
+    private String path;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "mpegfile_id", nullable = false)
     private MPEGFile mpegfile;
 
-    //@OneToMany(mappedBy = "dataset-group", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    //private Set<Dataset> datasets;
+    @OneToMany(mappedBy = "datasetGroup", fetch = FetchType.LAZY)
+    private List<Dataset> datasets;
+
+    public DatasetGroup(MPEGFile mpegfile) {
+        this.mpegfile = mpegfile;
+    }
+
+    public DatasetGroup() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public MPEGFile getMpegfile() {
+        return mpegfile;
+    }
+
+    public Integer getDg_id() {
+        return dg_id;
+    }
+
+    public void setDg_id(Integer dg_id) {
+        this.dg_id = dg_id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getCenter() {
+        return center;
+    }
+
+    public void setCenter(String center) {
+        this.center = center;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public List<Dataset> getDatasets() {
+        return datasets;
+    }
 }
