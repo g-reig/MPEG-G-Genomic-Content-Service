@@ -36,7 +36,7 @@ public class DatasetUtil {
             }
 
             if (dt_pr != null) {
-                f.createFile(datasetPath+File.separator+"dt_md.xml",new String(dt_pr.getBytes()));
+                f.createFile(datasetPath+File.separator+"dt_pr.xml",new String(dt_pr.getBytes()));
             }
             datasetRepository.save(d);
         } catch (Exception e) {
