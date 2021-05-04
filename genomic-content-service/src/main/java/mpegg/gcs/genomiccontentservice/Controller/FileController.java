@@ -7,6 +7,8 @@ import mpegg.gcs.genomiccontentservice.Repositories.DatasetGroupRepository;
 import mpegg.gcs.genomiccontentservice.Repositories.DatasetRepository;
 import mpegg.gcs.genomiccontentservice.Repositories.MPEGFileRepository;
 import mpegg.gcs.genomiccontentservice.Utils.*;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,9 +82,7 @@ public class FileController {
         return new ResponseEntity<String>("ok",HttpStatus.OK);
     }
 
-    //Tested
-    @PostMapping("/addDataset")
-    public ResponseEntity<String> addDataset(@AuthenticationPrincipal Jwt jwt, @RequestPart(value = "dt_md", required = false) MultipartFile dt_md, @RequestPart(value = "dt_pr", required = false) MultipartFile dt_pr, @RequestPart("dg_id") String dg_id, Integer dt_id) {
+    private ResponseEntity<String> addDataset(Jwt jwt, MultipartFile dt_md, MultipartFile dt_pr, String dg_id, Integer dt_id) {
         Long dg_idL = Long.parseLong(dg_id);
         Optional<DatasetGroup> datasetGroupOptional = datasetGroupRepository.findById(dg_idL);
         if (datasetGroupOptional.isPresent()) {
@@ -103,8 +103,20 @@ public class FileController {
         return new ResponseEntity<String>("DatasetGroup doesn't exist",HttpStatus.NOT_ACCEPTABLE);
     }
 
+    //Tested
+    @PostMapping("/addDataset")
+    public ResponseEntity<String> addDatasetAux(@AuthenticationPrincipal Jwt jwt, @RequestPart(value = "dt_md", required = false) MultipartFile dt_md, @RequestPart(value = "dt_pr", required = false) MultipartFile dt_pr, @RequestPart("dg_id") String dg_id) {
+        try {
+            return addDataset(jwt,dt_md,dt_pr,dg_id,null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<String>(e.toString(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    //Tested
     @PostMapping("/editDatasetGroup")
-    public ResponseEntity<String> editDatasetGroup(@AuthenticationPrincipal Jwt jwt, @RequestPart(value = "dg_md",required = false) MultipartFile dg_md, @RequestPart(value = "dg_pr",required = false) MultipartFile dg_pr, @RequestPart(value = "dg_id") String dg_id) {
+    public ResponseEntity<String> editDatasetGroup(@AuthenticationPrincipal Jwt jwt, @RequestPart(value = "dg_md", required = false) MultipartFile dg_md, @RequestPart(value = "dg_pr",required = false) MultipartFile dg_pr, @RequestPart(value = "dg_id") String dg_id) {
         Long dg_idL = Long.parseLong(dg_id);
         Optional<DatasetGroup> datasetGroupOptional = datasetGroupRepository.findById(dg_idL);
         if (datasetGroupOptional.isPresent()) {
@@ -114,19 +126,32 @@ public class FileController {
                 return new ResponseEntity<String>("ok",HttpStatus.OK);
             } catch (Exception e) {
                 e.printStackTrace();
-                return new ResponseEntity<String>(e.toString(),HttpStatus.NOT_ACCEPTABLE);
+                return new ResponseEntity<String>(e.toString(),HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
         return new ResponseEntity<String>("DatasetGroup doesn't exist", HttpStatus.NOT_ACCEPTABLE);
     }
 
+    //Tested
     @PostMapping("/editDataset")
-    public String editDataset(@AuthenticationPrincipal Jwt jwt, @RequestPart("dt_md") MultipartFile dt_md, @RequestPart("dt_pr") MultipartFile dt_pr, @RequestPart("dt_id") String dt_id) {
-        return "Not implemented";
+    public ResponseEntity<String> editDataset(@AuthenticationPrincipal Jwt jwt, @RequestPart(value = "dt_md", required = false) MultipartFile dt_md, @RequestPart(value = "dt_pr",required = false) MultipartFile dt_pr, @RequestPart("dt_id") String dt_id) {
+        Long dt_idL = Long.parseLong(dt_id);
+        Optional<Dataset> datasetOptional = datasetRepository.findById(dt_idL);
+        if (datasetOptional.isPresent()) {
+            Dataset dt = datasetOptional.get();
+            try {
+                dtUtil.editDataset(dt,dt_md,dt_pr);
+                return new ResponseEntity<String>("ok",HttpStatus.OK);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new ResponseEntity<String>(e.toString(),HttpStatus.NOT_ACCEPTABLE);
+            }
+        }
+        return new ResponseEntity<String>("Dataset doesn't exist", HttpStatus.NOT_ACCEPTABLE);
     }
 
     @DeleteMapping("/deleteFile")
-    public String deleteFile(@AuthenticationPrincipal Jwt jwt, @RequestParam("file_id") String file_id) {
+    public ResponseEntity<String> deleteFile(@AuthenticationPrincipal Jwt jwt, @RequestParam("file_id") String file_id) {
         Long file_idL = Long.parseLong(file_id);
         Optional<MPEGFile> mpegFileOptional = mpegFileRepository.findById(file_idL);
         if (mpegFileOptional.isPresent()) {
@@ -140,15 +165,15 @@ public class FileController {
                 mUtil.deleteMpegFile(mpegfile,mpegFileRepository);
             } catch (Exception e) {
                 e.printStackTrace();
-                return "not ok";
+                return new ResponseEntity<String>(e.toString(),HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            return "ok";
+            return new ResponseEntity<String>("ok",HttpStatus.OK);
         }
-        return "not ok";
+        return new ResponseEntity<String>("File doesn't exist",HttpStatus.BAD_REQUEST);
     }
 
     @DeleteMapping("/deleteDatasetGroup")
-    public String deleteDatasetGroup(@AuthenticationPrincipal Jwt jwt, @RequestParam("dg_id") String dg_id) {
+    public ResponseEntity<String> deleteDatasetGroup(@AuthenticationPrincipal Jwt jwt, @RequestParam("dg_id") String dg_id) {
         Long dg_idL = Long.parseLong(dg_id);
         Optional<DatasetGroup> datasetGroupOptional = datasetGroupRepository.findById(dg_idL);
         if (datasetGroupOptional.isPresent()) {
@@ -160,15 +185,16 @@ public class FileController {
                 try {
                     dgUtil.deleteDatasetGroup(dg,datasetGroupRepository);
                 } catch (Exception e) {
-                    return "Not ok";
+                    return new ResponseEntity<String>(e.toString(),HttpStatus.INTERNAL_SERVER_ERROR);
                 }
+                return new ResponseEntity<String>("ok",HttpStatus.OK);
             }
         }
-        return "ok";
+        return new ResponseEntity<String>("DatasetGroup doesn't exist",HttpStatus.NOT_ACCEPTABLE);
     }
 
     @DeleteMapping("/deleteDataset")
-    public String deleteDataset(@AuthenticationPrincipal Jwt jwt, @RequestParam("dt_id") String dt_id) {
+    public ResponseEntity<String> deleteDataset(@AuthenticationPrincipal Jwt jwt, @RequestParam("dt_id") String dt_id) {
         Long dt_idL = Long.parseLong(dt_id);
         Optional<Dataset> datasetOptional = datasetRepository.findById(dt_idL);
         if (datasetOptional.isPresent()) {
@@ -177,20 +203,46 @@ public class FileController {
                 dtUtil.deleteDataset(dt,datasetRepository);
             } catch (Exception e) {
                 e.printStackTrace();
-                return "Not ok";
+                return new ResponseEntity<String>(e.toString(),HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            return "ok";
+            return new ResponseEntity<String>("ok",HttpStatus.OK);
         }
-        return "Not ok";
+        return new ResponseEntity<String>("DatasetGroup doesn't exist",HttpStatus.NOT_ACCEPTABLE);
     }
+
+    @GetMapping("/mpegfile/{file_id}")
+    public ResponseEntity<JSONObject> getFile(@AuthenticationPrincipal Jwt jwt, @PathVariable("file_id") String file_id) {
+        Long file_idL = Long.parseLong(file_id);
+        Optional<MPEGFile> fileOptional = mpegFileRepository.findById(file_idL);
+        MPEGFile file = null;
+        if (fileOptional.isPresent()) {
+            file = fileOptional.get();
+            JSONObject jo = new JSONObject();
+            jo.put("name",file.getName());
+            jo.put("id",file.getId());
+            JSONArray ja = new JSONArray();
+            if (file.getDatasetGroups() != null) {
+                for (DatasetGroup dg : file.getDatasetGroups()) ja.add(dg.getId());
+            }
+            jo.put("dg",ja);
+            return new ResponseEntity<JSONObject>(jo,HttpStatus.OK);
+        }
+        return new ResponseEntity<JSONObject>(HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @GetMapping("/dg/{dg_id}/{resource}")
+    public ResponseEntity<String> getDatasetGroup(@AuthenticationPrincipal Jwt jwt, @PathVariable("dg_id") String dg_id, @PathVariable("resource") String resource) {
+        return new ResponseEntity<String>("Not implemented",HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @GetMapping("/dt/{dt_id}/{resource}")
+    public ResponseEntity<String> getDatasetMetadata(@AuthenticationPrincipal Jwt jwt, @PathVariable("dt_id") String dt_id, @PathVariable("resource") String resource) {
+        return new ResponseEntity<String>("Not implemented",HttpStatus.NOT_IMPLEMENTED);
+    }
+
 
     @GetMapping("/ownFiles")
     public List<MPEGFile> getFiles(@AuthenticationPrincipal Jwt jwt) {
         return mpegFileRepository.findByOwner(j.getUID(jwt));
-    }
-
-    @GetMapping("/get")
-    public String get(@AuthenticationPrincipal Jwt jwt) {
-        return "ok";
     }
 }

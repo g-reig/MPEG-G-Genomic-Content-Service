@@ -5,6 +5,8 @@ import org.apache.tomcat.util.http.fileupload.FileUtils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.UUID;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -50,5 +52,9 @@ public class FileUtil {
         FileWriter writer = new FileWriter(path);
         writer.write(content);
         writer.close();
+    }
+
+    public String getFile(String path) throws IOException {
+        return new String(Files.readAllBytes(Paths.get(path)));
     }
 }
