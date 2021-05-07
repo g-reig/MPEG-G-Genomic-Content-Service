@@ -32,10 +32,12 @@ public class DatasetUtil {
         try {
             if (dt_md != null) {
                 //Falta afegir metadades a la BD.
+                d.setMetadata(true);
                 f.createFile(datasetPath + File.separator + "dt_md.xml", new String(dt_md.getBytes()));
             }
 
             if (dt_pr != null) {
+                d.setProtection(true);
                 f.createFile(datasetPath+File.separator+"dt_pr.xml",new String(dt_pr.getBytes()));
             }
             datasetRepository.save(d);
@@ -59,12 +61,25 @@ public class DatasetUtil {
         datasetRepository.deleteById(dt.getId());
     }
 
-    public void editDataset(Dataset dt, MultipartFile dt_md, MultipartFile dt_pr) throws Exception {
+    public void editDataset(Dataset dt, MultipartFile dt_md, MultipartFile dt_pr, DatasetRepository datasetRepository) throws Exception {
         if (dt_md != null) {
+            dt.setMetadata(true);
             f.updateFile(dt.getPath()+File.separator+"dt_md.xml",new String(dt_md.getBytes()));
         }
         if (dt_pr != null) {
+            dt.setProtection(true);
             f.updateFile(dt.getPath()+File.separator+"dt_pr.xml",new String(dt_pr.getBytes()));
         }
+        datasetRepository.save(dt);
     }
+
+    public String getMetadata(Dataset dt) throws IOException {
+        return f.getFile(dt.getPath()+File.separator+"dt_md.xml");
+    }
+
+    public String getProtection(Dataset dt) throws IOException {
+        return f.getFile(dt.getPath()+File.separator+"dt_pr.xml");
+    }
+
+
 }

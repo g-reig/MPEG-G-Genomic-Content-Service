@@ -7,20 +7,20 @@
   <Samples>
     <Sample>
       <TaxonId>9606</TaxonId>
-      <Title>CLL Genome Project. RNA-seq Sample: sample7</Title>
+      <Title>CLL Genome Project. RNA-seq Sample: sample6</Title>
       <Extensions>
         <Extension>
           <Type>urn:mpeg:mpeg-g:metadata:extension:ega:SampleType</Type>
-          <tns:EGASampleExtension alias="sample7" center_name="Hospital XXX Barcelona">
+          <tns:EGASampleExtension alias="sample6" center_name="Hospital XXX Barcelona">
             <SAMPLE_NAME>
               <COMMON_NAME>Human</COMMON_NAME>
               <SCIENTIFIC_NAME>Homo sapiens</SCIENTIFIC_NAME>
             </SAMPLE_NAME>
-            <DESCRIPTION>Chronic Lymphocytic Leukemia RNA_CLL from Ph_Blood of patient CLL-7</DESCRIPTION>
+            <DESCRIPTION>Chronic Lymphocytic Leukemia RNA_CLL from Ph_Blood of patient CLL-6</DESCRIPTION>
             <SAMPLE_ATTRIBUTES>
               <SAMPLE_ATTRIBUTE>
                 <TAG>Sample ID</TAG>
-                <VALUE>sample7</VALUE>
+                <VALUE>sample6</VALUE>
               </SAMPLE_ATTRIBUTE>
               <SAMPLE_ATTRIBUTE>
                 <TAG>sample type</TAG>
@@ -28,7 +28,7 @@
               </SAMPLE_ATTRIBUTE>
               <SAMPLE_ATTRIBUTE>
                 <TAG>Donor ID</TAG>
-                <VALUE>CLL-7</VALUE>
+                <VALUE>CLL-6</VALUE>
               </SAMPLE_ATTRIBUTE>
             </SAMPLE_ATTRIBUTES>
           </tns:EGASampleExtension>
@@ -39,16 +39,16 @@
   <Extentions>
     <Extension>
       <Type>urn:mpeg:mpeg-g:metadata:extension:ega:RunType</Type>
-      <tns:RUN alias="C05KVACXX_6_14_RNA-Seq_CNAG_CLL-C05KVACXX_6_14_sample7_paired" run_date="2012-05-04T00:00:00" center_name="Hospital XXX Barcelona" run_center="Centro Nacional de Análisis Genómico"/>    
+      <tns:RUN alias="C05KVACXX_8_15_RNA-Seq_CNAG_CLL-C05KVACXX_8_15_sample6_paired" run_date="2012-05-04T00:00:00" center_name="Hospital XXX Barcelona" run_center="Centro Nacional de Análisis Genómico"/>    
     </Extension>
     <Extension>
       <Type>urn:mpeg:mpeg-g:metadata:extension:ega:ExperimentType</Type>
-      <tns:ExperimentExtension alias="RNA-Seq_CNAG_CLL-C05KVACXX_6_14_sample7_paired" center_name="Hospital XXX Barcelona" broker_name="EGA">
+      <tns:ExperimentExtension alias="RNA-Seq_CNAG_CLL-C05KVACXX_8_15_sample6_paired" center_name="Hospital XXX Barcelona" broker_name="EGA">
         <tns:DESIGN>
           <DESIGN_DESCRIPTION>RNA-Seq PolyA+ CLL</DESIGN_DESCRIPTION>
-          <SAMPLE_DESCRIPTOR refname="sample7"/>
+          <SAMPLE_DESCRIPTOR refname="sample6"/>
           <LIBRARY_DESCRIPTOR>
-            <LIBRARY_NAME>C05KVACXX_6_14</LIBRARY_NAME>
+            <LIBRARY_NAME>C05KVACXX_8_15</LIBRARY_NAME>
             <LIBRARY_STRATEGY>RNA-Seq</LIBRARY_STRATEGY>
             <LIBRARY_SOURCE>TRANSCRIPTOMIC</LIBRARY_SOURCE>
             <LIBRARY_SELECTION>RANDOM</LIBRARY_SELECTION>

@@ -19,6 +19,10 @@ public class Dataset {
 
     private String path;
 
+    private Boolean metadata;
+
+    private Boolean protection;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "datasetgroup_id", nullable = false)
     private DatasetGroup datasetGroup;
@@ -28,6 +32,8 @@ public class Dataset {
 
     public Dataset(DatasetGroup datasetGroup) {
         this.datasetGroup = datasetGroup;
+        this.metadata = false;
+        this.protection = false;
     }
 
     public Long getId() {
@@ -68,5 +74,21 @@ public class Dataset {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public Boolean getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Boolean metadata) {
+        this.metadata = metadata;
+    }
+
+    public Boolean getProtection() {
+        return protection;
+    }
+
+    public void setProtection(Boolean protection) {
+        this.protection = protection;
     }
 }

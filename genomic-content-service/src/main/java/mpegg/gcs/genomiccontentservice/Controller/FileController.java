@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -140,7 +141,7 @@ public class FileController {
         if (datasetOptional.isPresent()) {
             Dataset dt = datasetOptional.get();
             try {
-                dtUtil.editDataset(dt,dt_md,dt_pr);
+                dtUtil.editDataset(dt,dt_md,dt_pr,datasetRepository);
                 return new ResponseEntity<String>("ok",HttpStatus.OK);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -222,7 +223,10 @@ public class FileController {
             jo.put("id",file.getId());
             JSONArray ja = new JSONArray();
             if (file.getDatasetGroups() != null) {
-                for (DatasetGroup dg : file.getDatasetGroups()) ja.add(dg.getId());
+                for (DatasetGroup dg : file.getDatasetGroups()) {
+                    //Check authorization
+                    ja.add(dg.getId());
+                }
             }
             jo.put("dg",ja);
             return new ResponseEntity<JSONObject>(jo,HttpStatus.OK);
@@ -231,15 +235,78 @@ public class FileController {
     }
 
     @GetMapping("/dg/{dg_id}/{resource}")
-    public ResponseEntity<String> getDatasetGroup(@AuthenticationPrincipal Jwt jwt, @PathVariable("dg_id") String dg_id, @PathVariable("resource") String resource) {
-        return new ResponseEntity<String>("Not implemented",HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<JSONObject> getDatasetGroup(@AuthenticationPrincipal Jwt jwt, @PathVariable("dg_id") String dg_id, @PathVariable("resource") String resource) {
+        Long dg_idL = Long.parseLong(dg_id);
+        Optional<DatasetGroup> datasetGroupOptional = datasetGroupRepository.findById(dg_idL);
+        JSONObject jo = new JSONObject();
+        if (datasetGroupOptional.isEmpty()) {
+            return new ResponseEntity<JSONObject>(HttpStatus.NOT_ACCEPTABLE);
+        }
+        DatasetGroup dg = datasetGroupOptional.get();
+        switch (resource) {
+            case "datasets":
+                JSONArray ja = new JSONArray();
+                if (dg.getDatasets() != null) {
+                    for (Dataset dt : dg.getDatasets()) {
+                        //Check authorization
+                        ja.add(dt.getId());
+                    }
+                }
+                jo.put("dt", ja);
+                break;
+            case "metadata":
+                try {
+                    jo.put("md",dgUtil.getMetadata(dg));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return new ResponseEntity<JSONObject>(HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+                break;
+            case "protection":
+                try {
+                    jo.put("pr",dgUtil.getProtection(dg));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return new ResponseEntity<JSONObject>(HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+                break;
+            default:
+                return new ResponseEntity<JSONObject>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<JSONObject>(jo,HttpStatus.OK);
     }
 
     @GetMapping("/dt/{dt_id}/{resource}")
-    public ResponseEntity<String> getDatasetMetadata(@AuthenticationPrincipal Jwt jwt, @PathVariable("dt_id") String dt_id, @PathVariable("resource") String resource) {
-        return new ResponseEntity<String>("Not implemented",HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<JSONObject> getDataset(@AuthenticationPrincipal Jwt jwt, @PathVariable("dt_id") String dt_id, @PathVariable("resource") String resource) {
+        Long dt_idL = Long.parseLong(dt_id);
+        Optional<Dataset> datasetOptional = datasetRepository.findById(dt_idL);
+        JSONObject jo = new JSONObject();
+        if (datasetOptional.isEmpty()) {
+            return new ResponseEntity<JSONObject>(HttpStatus.NOT_ACCEPTABLE);
+        }
+        Dataset dt = datasetOptional.get();
+        switch (resource) {
+            case "metadata":
+                try {
+                    jo.put("md",dtUtil.getMetadata(dt));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return new ResponseEntity<JSONObject>(HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+                break;
+            case "protection":
+                try {
+                    jo.put("pr",dtUtil.getProtection(dt));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return new ResponseEntity<JSONObject>(HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+                break;
+            default:
+                return new ResponseEntity<JSONObject>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<JSONObject>(jo,HttpStatus.OK);
     }
-
 
     @GetMapping("/ownFiles")
     public List<MPEGFile> getFiles(@AuthenticationPrincipal Jwt jwt) {

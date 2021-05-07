@@ -55,6 +55,6 @@ public class FileUtil {
     }
 
     public String getFile(String path) throws IOException {
-        return new String(Files.readAllBytes(Paths.get(path)));
+        return Files.readString(Paths.get(path));
     }
 }

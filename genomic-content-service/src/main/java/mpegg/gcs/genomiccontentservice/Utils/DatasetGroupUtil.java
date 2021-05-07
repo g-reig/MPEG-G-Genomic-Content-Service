@@ -63,4 +63,12 @@ public class DatasetGroupUtil {
             f.updateFile(dg.getPath()+File.separator+"dg_pr.xml",new String(dg_pr.getBytes()));
         }
     }
+
+    public String getMetadata(DatasetGroup dg) throws IOException {
+        return f.getFile(dg.getPath()+File.separator+"dg_md.xml");
+    }
+
+    public String getProtection(DatasetGroup dg) throws IOException {
+        return f.getFile(dg.getPath()+File.separator+"dg_pr.xml");
+    }
 }
