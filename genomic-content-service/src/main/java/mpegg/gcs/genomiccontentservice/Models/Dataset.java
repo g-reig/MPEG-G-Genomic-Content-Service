@@ -23,6 +23,8 @@ public class Dataset {
 
     private Boolean protection;
 
+    private String owner;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "datasetgroup_id", nullable = false)
     private DatasetGroup datasetGroup;
@@ -30,10 +32,11 @@ public class Dataset {
     public Dataset() {
     }
 
-    public Dataset(DatasetGroup datasetGroup) {
+    public Dataset(DatasetGroup datasetGroup, String owner) {
         this.datasetGroup = datasetGroup;
         this.metadata = false;
         this.protection = false;
+        this.owner = owner;
     }
 
     public Long getId() {
@@ -90,5 +93,13 @@ public class Dataset {
 
     public void setProtection(Boolean protection) {
         this.protection = protection;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 }

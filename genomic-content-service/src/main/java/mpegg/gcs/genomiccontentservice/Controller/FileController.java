@@ -68,7 +68,7 @@ public class FileController {
         int dg_id = 0;
         if (a.size() != 0 && a.get(0) != null) dg_id = a.get(0)+1;
         try {
-            dg = dgUtil.addDatasetGroup(dg_md,dg_pr,file,datasetGroupRepository,dg_id);
+            dg = dgUtil.addDatasetGroup(jwt,dg_md,dg_pr,file,datasetGroupRepository,dg_id);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<String>(e.toString(),HttpStatus.INTERNAL_SERVER_ERROR);
@@ -94,7 +94,7 @@ public class FileController {
                 if (a.size() != 0 && a.get(0) != null) dt_id = a.get(0) + 1;
             }
             try {
-                dtUtil.addDataset(dt_md, dt_pr, dg, datasetRepository, dt_id);
+                dtUtil.addDataset(jwt, dt_md, dt_pr, dg, datasetRepository, dt_id);
             } catch (Exception e) {
                 e.printStackTrace();
                 return new ResponseEntity<String>(e.toString(),HttpStatus.INTERNAL_SERVER_ERROR);

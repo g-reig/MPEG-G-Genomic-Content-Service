@@ -4,6 +4,7 @@ import mpegg.gcs.genomiccontentservice.Models.Dataset;
 import mpegg.gcs.genomiccontentservice.Models.DatasetGroup;
 import mpegg.gcs.genomiccontentservice.Repositories.DatasetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -16,9 +17,10 @@ import java.util.Optional;
 public class DatasetUtil {
 
     final FileUtil f = new FileUtil();
+    final JWTUtil j = new JWTUtil();
 
-    public Dataset addDataset(MultipartFile dt_md, MultipartFile dt_pr, DatasetGroup dg, DatasetRepository datasetRepository, Integer dt_id) throws Exception {
-        Dataset d = new Dataset(dg);
+    public Dataset addDataset(Jwt jwt, MultipartFile dt_md, MultipartFile dt_pr, DatasetGroup dg, DatasetRepository datasetRepository, Integer dt_id) throws Exception {
+        Dataset d = new Dataset(dg,j.getUID(jwt));
         List<Dataset> datasets = dg.getDatasets();
         d.setDt_id(dt_id);
         String datasetPath = dg.getPath()+ File.separator+"dt_"+dt_id;

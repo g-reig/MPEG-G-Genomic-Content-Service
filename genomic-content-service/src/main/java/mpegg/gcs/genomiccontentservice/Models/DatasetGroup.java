@@ -24,6 +24,8 @@ public class DatasetGroup {
 
     private String path;
 
+    private String owner;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "mpegfile_id", nullable = false)
     private MPEGFile mpegfile;
@@ -31,8 +33,9 @@ public class DatasetGroup {
     @OneToMany(mappedBy = "datasetGroup", fetch = FetchType.LAZY)
     private List<Dataset> datasets;
 
-    public DatasetGroup(MPEGFile mpegfile) {
+    public DatasetGroup(MPEGFile mpegfile, String owner) {
         this.mpegfile = mpegfile;
+        this.owner = owner;
     }
 
     public DatasetGroup() {
@@ -96,5 +99,13 @@ public class DatasetGroup {
 
     public List<Dataset> getDatasets() {
         return datasets;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 }

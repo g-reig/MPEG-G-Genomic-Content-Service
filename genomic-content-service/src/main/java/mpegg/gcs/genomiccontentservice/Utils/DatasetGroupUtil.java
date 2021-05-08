@@ -6,6 +6,7 @@ import mpegg.gcs.genomiccontentservice.Models.MPEGFile;
 import mpegg.gcs.genomiccontentservice.Repositories.DatasetGroupRepository;
 import mpegg.gcs.genomiccontentservice.Repositories.DatasetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -17,9 +18,10 @@ import java.util.List;
 public class DatasetGroupUtil {
 
     final FileUtil f = new FileUtil();
+    final JWTUtil j = new JWTUtil();
 
-    public DatasetGroup addDatasetGroup(MultipartFile dg_md, MultipartFile dg_pr, MPEGFile mpegfile, DatasetGroupRepository datasetGroupRepository, int dg_id) throws Exception {
-        DatasetGroup dg = new DatasetGroup(mpegfile);
+    public DatasetGroup addDatasetGroup(Jwt jwt, MultipartFile dg_md, MultipartFile dg_pr, MPEGFile mpegfile, DatasetGroupRepository datasetGroupRepository, int dg_id) throws Exception {
+        DatasetGroup dg = new DatasetGroup(mpegfile,j.getUID(jwt));
         dg.setDg_id(dg_id);
         String datasetGroupPath = mpegfile.getPath() + File.separator + "dg_"+dg_id;
         try {
