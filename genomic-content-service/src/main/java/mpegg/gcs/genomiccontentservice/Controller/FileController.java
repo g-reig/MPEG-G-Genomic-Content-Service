@@ -31,6 +31,7 @@ public class FileController {
     final MPEGFileUtil mUtil = new MPEGFileUtil();
     final DatasetGroupUtil dgUtil = new DatasetGroupUtil();
     final DatasetUtil dtUtil = new DatasetUtil();
+    private final String urlGCS = "http://localhost:8082";
 
     @Autowired
     private MPEGFileRepository mpegFileRepository;
@@ -40,6 +41,8 @@ public class FileController {
 
     @Autowired
     private DatasetRepository datasetRepository;
+
+    private final AuthorizationUtil authorizationUtil = new AuthorizationUtil();
 
     //Tested
     @PostMapping("/addFile")
@@ -224,8 +227,8 @@ public class FileController {
             JSONArray ja = new JSONArray();
             if (file.getDatasetGroups() != null) {
                 for (DatasetGroup dg : file.getDatasetGroups()) {
-                    //Check authorization
-                    ja.add(dg.getId());
+                    boolean authorized = authorizationUtil.authorized(urlGCS, "dg", String.valueOf(dg.getId()), jwt, "GetIdDatasetGroup", datasetGroupRepository, datasetRepository);
+                    if (authorized) ja.add(dg.getId());
                 }
             }
             jo.put("dg",ja);
@@ -248,8 +251,8 @@ public class FileController {
                 JSONArray ja = new JSONArray();
                 if (dg.getDatasets() != null) {
                     for (Dataset dt : dg.getDatasets()) {
-                        //Check authorization
-                        ja.add(dt.getId());
+                        boolean authorized = authorizationUtil.authorized(urlGCS, "dt", String.valueOf(dt.getId()), jwt, "GetIdDataset", datasetGroupRepository, datasetRepository);
+                        if (authorized) ja.add(dt.getId());
                     }
                 }
                 jo.put("dt", ja);
