@@ -19,11 +19,13 @@ public class DatasetGroupUtil {
 
     final FileUtil f = new FileUtil();
     final JWTUtil j = new JWTUtil();
+    final MetadataUtil metadataUtil = new MetadataUtil();
 
     public DatasetGroup addDatasetGroup(Jwt jwt, MultipartFile dg_md, MultipartFile dg_pr, MPEGFile mpegfile, DatasetGroupRepository datasetGroupRepository, int dg_id) throws Exception {
         DatasetGroup dg = new DatasetGroup(mpegfile,j.getUID(jwt));
         dg.setDg_id(dg_id);
         String datasetGroupPath = mpegfile.getPath() + File.separator + "dg_"+dg_id;
+        dg = metadataUtil.parseDatasetGroup(new String(dg_md.getBytes()), dg);
         try {
             dg.setPath(datasetGroupPath);
             f.createDirectory(datasetGroupPath);
@@ -36,7 +38,7 @@ public class DatasetGroupUtil {
             f.createFile(datasetGroupPath + File.separator + "dg_md.xml", new String(dg_md.getBytes()));
             f.createFile(datasetGroupPath + File.separator + "dg_pr.xml", new String(dg_pr.getBytes()));
             datasetGroupRepository.save(dg);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             try {
                 f.deleteDirectory(datasetGroupPath);
