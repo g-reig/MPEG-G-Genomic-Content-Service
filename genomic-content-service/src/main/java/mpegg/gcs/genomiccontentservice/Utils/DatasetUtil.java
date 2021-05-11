@@ -18,12 +18,14 @@ public class DatasetUtil {
 
     final FileUtil f = new FileUtil();
     final JWTUtil j = new JWTUtil();
+    final MetadataUtil metadataUtil = new MetadataUtil();
 
     public Dataset addDataset(Jwt jwt, MultipartFile dt_md, MultipartFile dt_pr, DatasetGroup dg, DatasetRepository datasetRepository, Integer dt_id) throws Exception {
         Dataset d = new Dataset(dg,j.getUID(jwt));
         List<Dataset> datasets = dg.getDatasets();
         d.setDt_id(dt_id);
         String datasetPath = dg.getPath()+ File.separator+"dt_"+dt_id;
+        if (dt_md != null) d = metadataUtil.parseDataset(new String(dt_md.getBytes()), d);
         try {
             f.createDirectory(datasetPath);
             d.setPath(datasetPath);

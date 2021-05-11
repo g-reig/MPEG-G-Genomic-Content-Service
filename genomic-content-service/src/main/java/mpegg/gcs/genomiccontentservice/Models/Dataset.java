@@ -13,6 +13,7 @@ public class Dataset {
 
     private Integer dt_id;
 
+    @Column(columnDefinition="VARCHAR(2048)")
     private String title;
 
     private String taxon_id;
