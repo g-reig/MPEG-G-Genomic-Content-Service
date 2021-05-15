@@ -3,6 +3,7 @@ package mpegg.gcs.genomiccontentservice.Utils;
 import mpegg.gcs.genomiccontentservice.Models.Dataset;
 import mpegg.gcs.genomiccontentservice.Models.DatasetGroup;
 import mpegg.gcs.genomiccontentservice.Repositories.DatasetRepository;
+import mpegg.gcs.genomiccontentservice.Repositories.SampleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +26,12 @@ public class DatasetUtil {
         List<Dataset> datasets = dg.getDatasets();
         d.setDt_id(dt_id);
         String datasetPath = dg.getPath()+ File.separator+"dt_"+dt_id;
+        /*try {
+            datasetRepository.save(d);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("Error creating dataset");
+        }*/
         if (dt_md != null) d = metadataUtil.parseDataset(new String(dt_md.getBytes()), d);
         try {
             f.createDirectory(datasetPath);
@@ -51,7 +58,6 @@ public class DatasetUtil {
             } catch (IOException ignored) {}
             throw new Exception("Error creating dataset");
         }
-
         return d;
     }
 

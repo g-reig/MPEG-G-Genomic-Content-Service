@@ -2,6 +2,8 @@ package mpegg.gcs.genomiccontentservice.Utils;
 
 import mpegg.gcs.genomiccontentservice.Models.Dataset;
 import mpegg.gcs.genomiccontentservice.Models.DatasetGroup;
+import mpegg.gcs.genomiccontentservice.Models.Sample;
+import mpegg.gcs.genomiccontentservice.Repositories.SampleRepository;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -14,6 +16,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MetadataUtil {
     public DatasetGroup parseDatasetGroup(String xml, DatasetGroup dg) throws ParserConfigurationException, IOException, SAXException {
@@ -22,11 +26,23 @@ public class MetadataUtil {
         InputSource is = new InputSource(new StringReader(xml));
         Document d = builder.parse(is);
         Element root = d.getDocumentElement();
-
-        if (root.getElementsByTagName("Title").getLength() != 0) dg.setTitle(root.getElementsByTagName("Title").item(0).getTextContent());
-        if (root.getElementsByTagName("Description").getLength() != 0) dg.setDescription(root.getElementsByTagName("Description").item(0).getTextContent());
-        if (root.getElementsByTagName("Type").getLength() != 0) dg.setType(root.getElementsByTagName("Type").item(0).getTextContent());
-        if (root.getElementsByTagName("ProjectCentreName").getLength() != 0) dg.setCenter(root.getElementsByTagName("ProjectCentreName").item(0).getTextContent());
+        NodeList childList = d.getChildNodes();
+        if (root.getElementsByTagName("Title").getLength() != 0) {
+            Node n = root.getElementsByTagName("Title").item(0);
+            if (n.getParentNode().getNodeName().equals("DatasetGroupMetadata")) dg.setTitle(n.getTextContent());
+        }
+        if (root.getElementsByTagName("Description").getLength() != 0) {
+            Node n = root.getElementsByTagName("Description").item(0);
+            if (n.getParentNode().getNodeName().equals("DatasetGroupMetadata")) dg.setDescription(n.getTextContent());
+        }
+        if (root.getElementsByTagName("Type").getLength() != 0) {
+            Node n = root.getElementsByTagName("Type").item(0);
+            if (n.getParentNode().getNodeName().equals("DatasetGroupMetadata")) dg.setType(n.getTextContent());
+        }
+        if (root.getElementsByTagName("ProjectCentreName").getLength() != 0) {
+            Node n = root.getElementsByTagName("ProjectCentreName").item(0);
+            if (n.getParentNode().getNodeName().equals("ProjectCentre")) dg.setCenter(n.getTextContent());
+        }
         return dg;
     }
 
@@ -37,11 +53,15 @@ public class MetadataUtil {
         Document d = builder.parse(is);
         Element root = d.getDocumentElement();
         NodeList list = root.getElementsByTagName("Sample");
-        if (list.getLength() != 0) {
+        ArrayList<Sample> sampleList = new ArrayList<Sample>();
+        for (int i = 0; i < list.getLength(); ++i) {
             Element sample = (Element)list.item(0);
-            if (sample.getElementsByTagName("Title").getLength() != 0) dt.setTitle(sample.getElementsByTagName("Title").item(0).getTextContent());
-            if (sample.getElementsByTagName("TaxonId").getLength() != 0) dt.setTaxon_id(sample.getElementsByTagName("TaxonId").item(0).getTextContent());
+            Sample s = new Sample(dt);
+            if (sample.getElementsByTagName("Title").getLength() != 0) s.setTitle(sample.getElementsByTagName("Title").item(0).getTextContent());
+            if (sample.getElementsByTagName("TaxonId").getLength() != 0) s.setTaxon_id(sample.getElementsByTagName("TaxonId").item(0).getTextContent());
+            sampleList.add(s);
         }
+        dt.setSamples(sampleList);
         return dt;
     }
 }

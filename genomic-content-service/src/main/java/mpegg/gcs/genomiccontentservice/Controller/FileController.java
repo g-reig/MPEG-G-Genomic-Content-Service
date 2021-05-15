@@ -6,6 +6,7 @@ import mpegg.gcs.genomiccontentservice.Models.MPEGFile;
 import mpegg.gcs.genomiccontentservice.Repositories.DatasetGroupRepository;
 import mpegg.gcs.genomiccontentservice.Repositories.DatasetRepository;
 import mpegg.gcs.genomiccontentservice.Repositories.MPEGFileRepository;
+import mpegg.gcs.genomiccontentservice.Repositories.SampleRepository;
 import mpegg.gcs.genomiccontentservice.Utils.*;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -41,6 +42,9 @@ public class FileController {
 
     @Autowired
     private DatasetRepository datasetRepository;
+
+    @Autowired
+    private SampleRepository sampleRepository;
 
     private final AuthorizationUtil authorizationUtil = new AuthorizationUtil();
 
