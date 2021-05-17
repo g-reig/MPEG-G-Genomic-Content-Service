@@ -2,6 +2,7 @@ package mpegg.gcs.genomiccontentservice.Utils;
 
 import mpegg.gcs.genomiccontentservice.Models.Dataset;
 import mpegg.gcs.genomiccontentservice.Models.DatasetGroup;
+import mpegg.gcs.genomiccontentservice.Models.MPEGFile;
 import mpegg.gcs.genomiccontentservice.Repositories.*;
 import net.minidev.json.JSONObject;
 import org.springframework.http.HttpEntity;
@@ -29,28 +30,28 @@ public class AuthorizationUtil {
     private final String requestSample = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
             "<Request xmlns=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17\"\n"+
             "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"+
-    "xsi:schemaLocation=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17 http://docs.oasis-open.org/xacml/3.0/xacml-core-v3-schema-wd-17.xsd\"\n"+
-    "ReturnPolicyIdList=\"false\" CombinedDecision=\"false\">\n"+
-    "<Attributes Category=\"urn:oasis:names:tc:xacml:1.0:subject-category:access-subject\">\n"+
-        "<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:example:attribute:role\" IncludeInResult=\"true\">\n"+
+            "xsi:schemaLocation=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17 http://docs.oasis-open.org/xacml/3.0/xacml-core-v3-schema-wd-17.xsd\"\n"+
+            "ReturnPolicyIdList=\"false\" CombinedDecision=\"false\">\n"+
+            "<Attributes Category=\"urn:oasis:names:tc:xacml:1.0:subject-category:access-subject\">\n"+
+            "<Attribute AttributeId=\"urn:oasis:names:tc:xacml:3.0:example:attribute:role\" IncludeInResult=\"true\">\n"+
             "<AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">%s</AttributeValue>\n"+
-        "</Attribute>\n"+
-    "</Attributes>\n"+
-    "<Attributes Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:action\">\n"+
-        "<Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:action:action-id\"\n"+
-    "IncludeInResult=\"true\">\n"+
+            "</Attribute>\n"+
+            "</Attributes>\n"+
+            "<Attributes Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:action\">\n"+
+            "<Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:action:action-id\"\n"+
+            "IncludeInResult=\"true\">\n"+
             "<AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">%s</AttributeValue>\n"+
-        "</Attribute>\n"+
-    "</Attributes>\n"+
-    "<Attributes Category=\"urn:oasis:names:tc:xacml:3.0:date\">\n"+
-        "<Attribute AttributeId=\"accessDate\" IncludeInResult=\"true\">\n"+
+            "</Attribute>\n"+
+            "</Attributes>\n"+
+            "<Attributes Category=\"urn:oasis:names:tc:xacml:3.0:date\">\n"+
+            "<Attribute AttributeId=\"accessDate\" IncludeInResult=\"true\">\n"+
             "<AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#date\">%s</AttributeValue>\n"+
-        "</Attribute>\n"+
-    "</Attributes>\n"+
-"</Request>";
+            "</Attribute>\n"+
+            "</Attributes>\n"+
+            "</Request>";
     private JWTUtil jwtUtil = new JWTUtil();
 
-    public boolean authorized(String baseURL, String resource, String id, Jwt jwt, String action, DatasetGroupRepository datasetGroupRepository, DatasetRepository datasetRepository) {
+    public boolean authorized(String baseURL, String resource, String id, Jwt jwt, String action, DatasetGroupRepository datasetGroupRepository, DatasetRepository datasetRepository, MPEGFileRepository mpegFileRepository) {
         if (resource.equals("dt")) {
             Long dtIdL = Long.parseLong(id);
             Optional<Dataset> dtOpt = datasetRepository.findById(dtIdL);
@@ -69,6 +70,16 @@ public class AuthorizationUtil {
             DatasetGroup dg = dgOpt.get();
             if (dg.getOwner().equals(jwtUtil.getUID(jwt))) return true;
         }
+
+        else if (resource.equals("file")) {
+            Long fileIdL = Long.parseLong(id);
+            Optional<MPEGFile> fileOpt = mpegFileRepository.findById(fileIdL);
+            if (fileOpt.isEmpty()) return false;
+            MPEGFile file = fileOpt.get();
+            return file.getOwner().equals(jwtUtil.getUID(jwt));
+        }
+
+        else return false;
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization" , "Bearer "+jwt.getTokenValue());
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(headers);

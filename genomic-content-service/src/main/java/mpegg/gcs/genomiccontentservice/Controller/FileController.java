@@ -130,7 +130,7 @@ public class FileController {
         if (datasetGroupOptional.isPresent()) {
             DatasetGroup dg = datasetGroupOptional.get();
             try {
-                dgUtil.editDatasetGroup(dg,dg_md,dg_pr);
+                dgUtil.editDatasetGroup(dg,dg_md,dg_pr,datasetGroupRepository);
                 return new ResponseEntity<String>("ok",HttpStatus.OK);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -231,7 +231,7 @@ public class FileController {
             JSONArray ja = new JSONArray();
             if (file.getDatasetGroups() != null) {
                 for (DatasetGroup dg : file.getDatasetGroups()) {
-                    boolean authorized = authorizationUtil.authorized(urlGCS, "dg", String.valueOf(dg.getId()), jwt, "GetIdDatasetGroup", datasetGroupRepository, datasetRepository);
+                    boolean authorized = authorizationUtil.authorized(urlGCS, "dg", String.valueOf(dg.getId()), jwt, "GetIdDatasetGroup", datasetGroupRepository, datasetRepository, mpegFileRepository);
                     if (authorized) ja.add(dg.getId());
                 }
             }
@@ -255,7 +255,7 @@ public class FileController {
                 JSONArray ja = new JSONArray();
                 if (dg.getDatasets() != null) {
                     for (Dataset dt : dg.getDatasets()) {
-                        boolean authorized = authorizationUtil.authorized(urlGCS, "dt", String.valueOf(dt.getId()), jwt, "GetIdDataset", datasetGroupRepository, datasetRepository);
+                        boolean authorized = authorizationUtil.authorized(urlGCS, "dt", String.valueOf(dt.getId()), jwt, "GetIdDataset", datasetGroupRepository, datasetRepository, mpegFileRepository);
                         if (authorized) ja.add(dt.getId());
                     }
                 }

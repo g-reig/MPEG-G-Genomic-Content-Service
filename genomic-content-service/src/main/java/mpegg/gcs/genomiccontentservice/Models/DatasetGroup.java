@@ -109,4 +109,11 @@ public class DatasetGroup {
     public void setOwner(String owner) {
         this.owner = owner;
     }
+
+    public void clearMetadata() {
+        this.title = null;
+        this.type = null;
+        this.description = null;
+        this.center = null;
+    }
 }

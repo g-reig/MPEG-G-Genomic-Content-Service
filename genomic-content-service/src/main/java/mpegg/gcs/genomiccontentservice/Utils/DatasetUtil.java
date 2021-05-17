@@ -75,6 +75,7 @@ public class DatasetUtil {
         if (dt_md != null) {
             dt.setMetadata(true);
             f.updateFile(dt.getPath()+File.separator+"dt_md.xml",new String(dt_md.getBytes()));
+            dt = metadataUtil.parseDataset(new String(dt_md.getBytes()), dt);
         }
         if (dt_pr != null) {
             dt.setProtection(true);

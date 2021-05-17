@@ -59,9 +59,11 @@ public class DatasetGroupUtil {
         datasetGroupRepository.deleteById(dg.getId());
     }
 
-    public void editDatasetGroup(DatasetGroup dg, MultipartFile dg_md, MultipartFile dg_pr) throws Exception {
+    public void editDatasetGroup(DatasetGroup dg, MultipartFile dg_md, MultipartFile dg_pr, DatasetGroupRepository datasetGroupRepository) throws Exception {
         if (dg_md != null) {
             f.updateFile(dg.getPath()+File.separator+"dg_md.xml",new String(dg_md.getBytes()));
+            dg = metadataUtil.parseDatasetGroup(new String(dg_md.getBytes()), dg);
+            datasetGroupRepository.save(dg);
         }
         if (dg_pr != null) {
             f.updateFile(dg.getPath()+File.separator+"dg_pr.xml",new String(dg_pr.getBytes()));

@@ -3,7 +3,6 @@ package mpegg.gcs.genomiccontentservice.Utils;
 import mpegg.gcs.genomiccontentservice.Models.Dataset;
 import mpegg.gcs.genomiccontentservice.Models.DatasetGroup;
 import mpegg.gcs.genomiccontentservice.Models.Sample;
-import mpegg.gcs.genomiccontentservice.Repositories.SampleRepository;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -21,6 +20,7 @@ import java.util.List;
 
 public class MetadataUtil {
     public DatasetGroup parseDatasetGroup(String xml, DatasetGroup dg) throws ParserConfigurationException, IOException, SAXException {
+        dg.clearMetadata();
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         InputSource is = new InputSource(new StringReader(xml));
@@ -37,7 +37,10 @@ public class MetadataUtil {
         }
         if (root.getElementsByTagName("Type").getLength() != 0) {
             Node n = root.getElementsByTagName("Type").item(0);
-            if (n.getParentNode().getNodeName().equals("DatasetGroupMetadata")) dg.setType(n.getTextContent());
+            if (n.getParentNode().getNodeName().equals("DatasetGroupMetadata")) {
+                n = n.getAttributes().getNamedItem("existing_study_type");
+                if (n != null) dg.setType(n.getNodeValue());
+            }
         }
         if (root.getElementsByTagName("ProjectCentreName").getLength() != 0) {
             Node n = root.getElementsByTagName("ProjectCentreName").item(0);
@@ -65,4 +68,3 @@ public class MetadataUtil {
         return dt;
     }
 }
-
