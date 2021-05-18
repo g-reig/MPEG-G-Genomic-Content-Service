@@ -89,7 +89,8 @@ public class DatasetUtil {
     }
 
     public String getProtection(Dataset dt) throws IOException {
-        return f.getFile(dt.getPath()+File.separator+"dt_pr.xml");
+        if (dt.getProtection()) return f.getFile(dt.getPath()+File.separator+"dt_pr.xml");
+        return null;
     }
 
 
