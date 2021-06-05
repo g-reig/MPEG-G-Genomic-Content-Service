@@ -11,6 +11,7 @@ import mpegg.gcs.genomiccontentservice.Utils.*;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,7 +33,8 @@ public class FileController {
     final MPEGFileUtil mUtil = new MPEGFileUtil();
     final DatasetGroupUtil dgUtil = new DatasetGroupUtil();
     final DatasetUtil dtUtil = new DatasetUtil();
-    private final String urlGCS = "http://localhost:8082";
+    @Value("${gcs.url}")
+    private final String urlGCS = null;
 
     @Autowired
     private MPEGFileRepository mpegFileRepository;
@@ -51,13 +53,14 @@ public class FileController {
     //Tested
     @PostMapping("/addFile")
     public ResponseEntity<String> addFile(@AuthenticationPrincipal Jwt jwt, @RequestParam("file_name") String file_name) {
+        MPEGFile m = null;
         try {
-            mUtil.addMpegFile(file_name,jwt,mpegFileRepository);
+            m = mUtil.addMpegFile(file_name,jwt,mpegFileRepository);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<String>("Error creating file",HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<String>("Ok",HttpStatus.OK);
+        return new ResponseEntity<String>(m.getId().toString(),HttpStatus.OK);
     }
 
     //Tested
@@ -87,7 +90,7 @@ public class FileController {
                 ++dt_id;
             }
         }
-        return new ResponseEntity<String>("ok",HttpStatus.OK);
+        return new ResponseEntity<String>(dg.getId().toString(),HttpStatus.OK);
     }
 
     private ResponseEntity<String> addDataset(Jwt jwt, MultipartFile dt_md, MultipartFile dt_pr, String dg_id, Integer dt_id) {
@@ -100,13 +103,14 @@ public class FileController {
                 ArrayList<Integer> a = (ArrayList<Integer>) datasetRepository.getMaxDtId(dg.getId());
                 if (a.size() != 0 && a.get(0) != null) dt_id = a.get(0) + 1;
             }
+            Dataset dt = null;
             try {
-                dtUtil.addDataset(jwt, dt_md, dt_pr, dg, datasetRepository, dt_id);
+                dt = dtUtil.addDataset(jwt, dt_md, dt_pr, dg, datasetRepository, dt_id);
             } catch (Exception e) {
                 e.printStackTrace();
                 return new ResponseEntity<String>(e.toString(),HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            return new ResponseEntity<String>("ok",HttpStatus.OK);
+            return new ResponseEntity<String>(dt.getId().toString(),HttpStatus.OK);
         }
         return new ResponseEntity<String>("DatasetGroup doesn't exist",HttpStatus.NOT_ACCEPTABLE);
     }
@@ -231,8 +235,13 @@ public class FileController {
             JSONArray ja = new JSONArray();
             if (file.getDatasetGroups() != null) {
                 for (DatasetGroup dg : file.getDatasetGroups()) {
+                    JSONObject dg_jo = new JSONObject();
                     boolean authorized = authorizationUtil.authorized(urlGCS, "dg", String.valueOf(dg.getId()), jwt, "GetIdDatasetGroup", datasetGroupRepository, datasetRepository, mpegFileRepository);
-                    if (authorized) ja.add(dg.getId());
+                    if (authorized) {
+                        dg_jo.put("id",dg.getId());
+                        dg_jo.put("dg_id",dg.getDg_id());
+                        ja.add(dg_jo);
+                    }
                 }
             }
             jo.put("dg",ja);
@@ -255,15 +264,20 @@ public class FileController {
                 JSONArray ja = new JSONArray();
                 if (dg.getDatasets() != null) {
                     for (Dataset dt : dg.getDatasets()) {
+                        JSONObject dt_jo = new JSONObject();
                         boolean authorized = authorizationUtil.authorized(urlGCS, "dt", String.valueOf(dt.getId()), jwt, "GetIdDataset", datasetGroupRepository, datasetRepository, mpegFileRepository);
-                        if (authorized) ja.add(dt.getId());
+                        if (authorized) {
+                            dt_jo.put("id",dt.getId());
+                            dt_jo.put("dt_id",dt.getDt_id());
+                            ja.add(dt_jo);
+                        }
                     }
                 }
                 jo.put("dt", ja);
                 break;
             case "metadata":
                 try {
-                    jo.put("md",dgUtil.getMetadata(dg));
+                    jo.put("data",dgUtil.getMetadata(dg));
                 } catch (IOException e) {
                     e.printStackTrace();
                     return new ResponseEntity<JSONObject>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -271,7 +285,7 @@ public class FileController {
                 break;
             case "protection":
                 try {
-                    jo.put("pr",dgUtil.getProtection(dg));
+                    jo.put("data",dgUtil.getProtection(dg));
                 } catch (IOException e) {
                     e.printStackTrace();
                     return new ResponseEntity<JSONObject>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -295,7 +309,7 @@ public class FileController {
         switch (resource) {
             case "metadata":
                 try {
-                    jo.put("md",dtUtil.getMetadata(dt));
+                    jo.put("data",dtUtil.getMetadata(dt));
                 } catch (IOException e) {
                     e.printStackTrace();
                     return new ResponseEntity<JSONObject>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -303,7 +317,7 @@ public class FileController {
                 break;
             case "protection":
                 try {
-                    jo.put("pr",dtUtil.getProtection(dt));
+                    jo.put("data",dtUtil.getProtection(dt));
                 } catch (IOException e) {
                     e.printStackTrace();
                     return new ResponseEntity<JSONObject>(HttpStatus.INTERNAL_SERVER_ERROR);
